@@ -1,5 +1,5 @@
 {
-  "name": "SaveScum",
+  "name": "savescum",
   "version": "1.0.0",
   "description": "A simple desktop app used to save your game in Exanima",
   "main": "main.js",
