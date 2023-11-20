@@ -21,7 +21,8 @@ app.whenReady().then(() => {
     createWindow();
     
     // Run copyFile for testing purposes
-    copyFile(String.raw`c:/Users\Brandon\Desktop/ElectronTests/SourceFolder/DogWater.txt`, String.raw`c:/Users/Brandon/Desktop\ElectronTests/DestinationFolder`);
+    // copyFile(String.raw`c:/Users\Brandon\Desktop/ElectronTests/SourceFolder/DogWater.txt`, String.raw`c:/Users/Brandon/Desktop\ElectronTests/DestinationFolder\DogWater.txt`);
+    startAutoSave(String.raw`c:\Users\Brandon\AppData\Roaming\Exanima\Exanima001.rsg`);
 
     app.on("activate", () => { // Creates new window when app is activated and no windows currently exist. MacOS specific
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -32,31 +33,49 @@ app.on('window-all-closed', () => { // Listener that triggers when app window is
     if(process.platform !== "darwin") app.quit(); // If user is not on macOS quits app
 });
 
+// Used to watch the target file for changes
+let watcher
 
 const copyFile = (source, destination) => {
-    // Replace backslashes with forward slashes
-    const sourcePath = source;
-    const destinationPath = destination;
-    console.log(`source: ${sourcePath} destination: ${destinationPath}`);
-
-    // Create destination directory if it doesn't exist
-    if (!fs.existsSync(destinationPath)) {
-        fs.mkdirSync(destinationPath, { recursive: true });
+    // Copy the file if it exists
+    if (fs.existsSync(source)) {
+        fs.copyFile(source, destination, (err) => {
+            if (err) {
+                if (err.code === 'EBUSY') {
+                    console.log('file is being created by game.');
+                } else {
+                    console.error('copyFile error:', err);
+                }
+            } else {
+                console.log('File copied');
+            }
+        })
+    } else {
+        console.log("You died, press continue in the main menu (file doesn't exist)");
     }
-
-    // Get the file name from source path
-    const fileName = path.basename(sourcePath);
-
-    // Create destination path using filename
-    const destinationFile = path.join(destinationPath, fileName);
-
-    // Copy the file
-    fs.copyFile(sourcePath, destinationFile, (err) => {
-        if (err) {
-            console.error('copyFile error:', err);
-        } else {
-            console.log('File copied');
-        }
-    })
 }
 
+const startAutoSave = (source) => {
+    if (!watcher) {
+        // Start watching save file
+        try {
+            watcher = fs.watch(source, (eventType, filename) => {
+                if (eventType === 'rename') {
+                    console.log('You died, press continue in main menu (file deleted)');
+                } else {
+                    console.log(`eventType: ${eventType}`);
+                    console.log(`filename: ${filename}`);
+                    copyFile(source, source.replace('.rsg', '.rcp'));
+                }
+            });
+            console.log('watcher started');
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                console.log(`File ${source} does not exist yet, retrying in 10 seconds...`);
+                setTimeout(() => startAutoSave(source), 10000);
+            } else {
+                console.log(`Error starting watcher: ${err.message}`);
+            }
+        }
+    }
+}
