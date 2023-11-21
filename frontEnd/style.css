@@ -1,0 +1,57 @@
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background-color: hsl(250, 30%, 5%);
+    display: grid;
+    justify-items: center;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: .2fr .2fr 1fr;
+}
+
+form {
+    display: flex;
+    grid-column: 1 / span 2;
+    grid-row: 1 / span 1;
+    justify-content: center;
+    align-items: center;
+    width: min(100%, 258px);
+}
+.file-path {
+    width: 100%;
+    border: solid hsl(220, 30%, 25%) 2px;
+}
+
+.autosave-buttons {
+    display: flex;
+    grid-column: 1 / span 2;
+    grid-row: 2 / span 1;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+button {
+    background-color: hsl(220, 30%, 15%);
+    color: white;
+    border: solid hsl(220, 30%, 25%) 2px;
+    border-radius: 5px;
+}
+
+.console-display {
+    grid-column: 1 / span 2;
+    grid-row: 3 / span 1;
+    border: solid hsl(220, 30%, 25%) 3px;
+    background-color: hsl(250, 30%, 2%);
+    width: min(100%, 800px);
+    height: min(100%, 700px);
+    margin: 0;
+    padding: 5px;
+    box-sizing: border-box;
+}
