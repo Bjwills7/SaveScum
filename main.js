@@ -13,7 +13,7 @@ const createWindow = () => {
         }
     });
 
-    win.loadFile('index.html');
+    win.loadFile('frontEnd/index.html');
     win.webContents.openDevTools();
 };
 
