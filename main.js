@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require("path");
 const fs = require('fs');
 
@@ -8,6 +8,7 @@ const createWindow = () => {
         height: 600,
         webPreferences: {
             nodeIntegration: true, // Enable Node.js integration
+            contextIsolation: true,
             devTools: true, // Enable DevTools
             preload: path.join(__dirname, 'preload.js'), // Attach preload script to renderer process
         }
@@ -19,10 +20,6 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
     createWindow();
-    
-    // Run copyFile for testing purposes
-    // copyFile(String.raw`c:/Users\Brandon\Desktop/ElectronTests/SourceFolder/DogWater.txt`, String.raw`c:/Users/Brandon/Desktop\ElectronTests/DestinationFolder\DogWater.txt`);
-    startAutoSave(String.raw`c:\Users\Brandon\AppData\Roaming\Exanima\Exanima001.rsg`);
 
     app.on("activate", () => { // Creates new window when app is activated and no windows currently exist. MacOS specific
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -79,3 +76,7 @@ const startAutoSave = (source) => {
         }
     }
 }
+
+ipcMain.on('start-auto-save', (event, source) => {
+    startAutoSave(source);
+});

@@ -1,1 +1,7 @@
-// Code in this file can be defered to the end of the html file for front end purposes. Webpack can be used here.
+const startButton = document.querySelector('.start-button');
+const filePath = document.querySelector('.file-path');
+
+
+startButton.addEventListener('click', () => {
+    window.electronAPI.startAutoSave(filePath.value);
+});

@@ -1,11 +1,6 @@
-window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
-        const element = document.getElementById(selector);
-        console.log(element);
-        if (element) element.innerText = text;
-    };
+const { contextBridge, ipcMain, ipcRenderer } = require('electron');
+const path = require('path');
 
-    for (const dependency of ['chrome', 'node', 'electron']) {
-        replaceText(`${dependency}-version`, process.versions[dependency]);
-    };
+contextBridge.exposeInMainWorld('electronAPI', {
+    startAutoSave: (source) => ipcRenderer.send('start-auto-save', source)
 });
