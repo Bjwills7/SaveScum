@@ -10,6 +10,11 @@ startButton.addEventListener('click', () => {
     window.electronAPI.startAutoSave(activeFilePath);
 });
 
+// Stops watching for changes at activeFilePath
+stopButton.addEventListener('click', () => {
+    window.electronAPI.stopAutoSave();
+})
+
 // Opens file selection dialog and sets activeFilePath to selected path
 openFileBtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.openFile();

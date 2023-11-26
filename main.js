@@ -62,32 +62,43 @@ const copyFile = (source, destination) => {
 }
 
 const startAutoSave = (source) => {
-    if (!watcher) {
-        // Start watching save file
-        try {
-            watcher = fs.watch(source, (eventType, filename) => {
-                if (eventType === 'rename') {
-                    console.log('You died, press continue in main menu (file deleted)');
-                } else {
-                    console.log(`eventType: ${eventType}`);
-                    console.log(`filename: ${filename}`);
-                    copyFile(source, source.replace('.rsg', '.rcp'));
-                }
-            });
-            console.log('watcher started');
-        } catch (err) {
-            if (err.code === 'ENOENT') {
-                console.log(`File ${source} does not exist yet, retrying in 10 seconds...`);
-                setTimeout(() => startAutoSave(source), 10000);
-            } else if (err.message === 'The "filename" argument must be of type string or an instance of Buffer or URL. Received undefined') {
-                console.log(`Error starting auto-save: No save file selected`);
+    if(watcher) {
+        stopAutoSave();
+    }
+    try {
+        watcher = fs.watch(source, (eventType, filename) => {
+            if (eventType === 'rename') {
+                console.log('You died, press continue in main menu (file deleted)');
             } else {
-                console.log(`Error starting watcher: ${err.message}`);
+                console.log(`eventType: ${eventType}`);
+                console.log(`filename: ${filename}`);
+                copyFile(source, source.replace('.rsg', '.rcp'));
             }
+        });
+        console.log('watcher started');
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            console.log(`File ${source} does not exist yet, retrying in 10 seconds...`);
+            setTimeout(() => startAutoSave(source), 10000);
+        } else if (err.message === 'The "filename" argument must be of type string or an instance of Buffer or URL. Received undefined') {
+            console.log(`Error starting auto-save: No save file selected`);
+        } else {
+            console.log(`Error starting watcher: ${err.message}`);
         }
+    }
+}
+
+const stopAutoSave = () => {
+    if (watcher) {
+        watcher.close();
+        watcher = null; // Indicates that the watcher is inactive
+        console.log('Auto-Save stopped');
+    } else {
+        console.log("Auto-save can't be stopped because it's not running");
     }
 }
 
 ipcMain.on('start-auto-save', (event, source) => {
     startAutoSave(source);
 });
+ipcMain.on('stop-auto-save', stopAutoSave);

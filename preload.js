@@ -3,5 +3,6 @@ const path = require('path');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     startAutoSave: (source) => ipcRenderer.send('start-auto-save', source),
+    stopAutoSave: () => ipcRenderer.send('stop-auto-save'),
     openFile: () => ipcRenderer.invoke('dialog:openFile')
 });
