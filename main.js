@@ -58,6 +58,10 @@ const copyFile = (source, destination) => {
 }
 
 const startAutoSave = (source) => {
+    if (source && !endsWithRSG(source)) {
+        logToRenderer(`Incorrect file type, please select a save file that ends with .rsg`);
+        return;
+    }
     if(watcher) {
         stopAutoSave();
     }
@@ -105,6 +109,14 @@ const logToRenderer = (message) => { // Logs to main proccess console and sends 
     console.log(message);
     if (win) {
         win.webContents.send('log-message', message);
+    }
+}
+
+const endsWithRSG = (source) => {
+    if (source.toLowerCase().endsWith('.rsg')) {
+        return true;
+    } else {
+        return false;
     }
 }
 
