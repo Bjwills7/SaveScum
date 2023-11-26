@@ -43,12 +43,13 @@ const copyFile = (source, destination) => {
         fs.copyFile(source, destination, (err) => {
             if (err) {
                 if (err.code === 'EBUSY') {
-                    logToRenderer('file is being created by game.');
+                    logToRenderer('file is being modified by game.');
                 } else {
                     console.error('copyFile error:', err);
+                    logToRenderer(`copyFile error: ${err}`);
                 }
             } else {
-                logToRenderer('Auto-Save completed');
+                logToRenderer('auto-save completed');
             }
         })
     } else {
@@ -70,7 +71,7 @@ const startAutoSave = (source) => {
                 copyFile(source, source.replace('.rsg', '.rcp'));
             }
         });
-        logToRenderer('watcher started');
+        logToRenderer('auto-save started');
     } catch (err) {
         if (err.code === 'ENOENT') {
             logToRenderer(`File ${source} does not exist yet, retrying in 10 seconds...`);
@@ -78,7 +79,7 @@ const startAutoSave = (source) => {
         } else if (err.message === 'The "filename" argument must be of type string or an instance of Buffer or URL. Received undefined') {
             logToRenderer(`Error starting auto-save: No save file selected`);
         } else {
-            logToRenderer(`Error starting watcher: ${err.message}`);
+            logToRenderer(`Error starting auto-save: ${err.message}`);
         }
     }
 }
@@ -87,9 +88,9 @@ const stopAutoSave = () => {
     if (watcher) {
         watcher.close();
         watcher = null; // Indicates that the watcher is inactive
-        logToRenderer('Auto-Save stopped');
+        logToRenderer('auto-save stopped');
     } else {
-        logToRenderer("Auto-save can't be stopped because it's not running");
+        logToRenderer("auto-save can't be stopped because it's not running");
     }
 }
 
@@ -101,7 +102,7 @@ async function handleFileOpen () {
 }
 
 const logToRenderer = (message) => { // Logs to main proccess console and sends message to renderer
-    logToRenderer(message);
+    console.log(message);
     if (win) {
         win.webContents.send('log-message', message);
     }

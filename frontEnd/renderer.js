@@ -1,7 +1,8 @@
 const startButton = document.querySelector('.start-button');
 const stopButton = document.querySelector('.stop-button');
 const openFileBtn = document.querySelector(".open-file");
-const filePathDialog = document.querySelector("#file-path-dialog");
+const instructions = document.querySelector("#instructions");
+const consoleDisplay = document.querySelector('.console-display');
 
 let activeFilePath;
 
@@ -24,4 +25,7 @@ openFileBtn.addEventListener('click', async () => {
 // Recieves messages from main process and handles them accordingly
 window.electronAPI.listenForLogs((message) => {
     console.log(message);
+    const lineBreak = document.createElement('br');
+    const newMessageNode = document.createTextNode(message);
+    consoleDisplay.append(lineBreak, newMessageNode);
 })
