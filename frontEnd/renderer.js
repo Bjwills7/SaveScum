@@ -20,3 +20,8 @@ openFileBtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.openFile();
     activeFilePath = filePath;
 })
+
+// Recieves messages from main process and handles them accordingly
+window.electronAPI.listenForLogs((message) => {
+    console.log(message);
+})

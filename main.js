@@ -2,8 +2,10 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require("path");
 const fs = require('fs');
 
+let win; // expose main window to global scope
+
 const createWindow = () => {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -18,18 +20,11 @@ const createWindow = () => {
     win.webContents.openDevTools();
 };
 
-// test file opening logic
-async function handleFileOpen () {
-    const { canceled, filePaths } = await dialog.showOpenDialog();
-    if (!canceled) {
-      return filePaths[0]
-    }
-}
 
 app.whenReady().then(() => {
     ipcMain.handle('dialog:openFile', handleFileOpen);
     createWindow();
-
+    
     app.on("activate", () => { // Creates new window when app is activated and no windows currently exist. MacOS specific
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
@@ -48,16 +43,16 @@ const copyFile = (source, destination) => {
         fs.copyFile(source, destination, (err) => {
             if (err) {
                 if (err.code === 'EBUSY') {
-                    console.log('file is being created by game.');
+                    logToRenderer('file is being created by game.');
                 } else {
                     console.error('copyFile error:', err);
                 }
             } else {
-                console.log('File copied');
+                logToRenderer('Auto-Save completed');
             }
         })
     } else {
-        console.log("You died, press continue in the main menu (file doesn't exist)");
+        logToRenderer("You died, press continue in the main menu (file doesn't exist)");
     }
 }
 
@@ -68,22 +63,22 @@ const startAutoSave = (source) => {
     try {
         watcher = fs.watch(source, (eventType, filename) => {
             if (eventType === 'rename') {
-                console.log('You died, press continue in main menu (file deleted)');
+                logToRenderer('You died, press continue in main menu (file deleted)');
             } else {
-                console.log(`eventType: ${eventType}`);
-                console.log(`filename: ${filename}`);
+                logToRenderer(`eventType: ${eventType}`);
+                logToRenderer(`filename: ${filename}`);
                 copyFile(source, source.replace('.rsg', '.rcp'));
             }
         });
-        console.log('watcher started');
+        logToRenderer('watcher started');
     } catch (err) {
         if (err.code === 'ENOENT') {
-            console.log(`File ${source} does not exist yet, retrying in 10 seconds...`);
+            logToRenderer(`File ${source} does not exist yet, retrying in 10 seconds...`);
             setTimeout(() => startAutoSave(source), 10000);
         } else if (err.message === 'The "filename" argument must be of type string or an instance of Buffer or URL. Received undefined') {
-            console.log(`Error starting auto-save: No save file selected`);
+            logToRenderer(`Error starting auto-save: No save file selected`);
         } else {
-            console.log(`Error starting watcher: ${err.message}`);
+            logToRenderer(`Error starting watcher: ${err.message}`);
         }
     }
 }
@@ -92,9 +87,23 @@ const stopAutoSave = () => {
     if (watcher) {
         watcher.close();
         watcher = null; // Indicates that the watcher is inactive
-        console.log('Auto-Save stopped');
+        logToRenderer('Auto-Save stopped');
     } else {
-        console.log("Auto-save can't be stopped because it's not running");
+        logToRenderer("Auto-save can't be stopped because it's not running");
+    }
+}
+
+async function handleFileOpen () {
+    const { canceled, filePaths } = await dialog.showOpenDialog();
+    if (!canceled) {
+      return filePaths[0]
+    }
+}
+
+const logToRenderer = (message) => { // Logs to main proccess console and sends message to renderer
+    logToRenderer(message);
+    if (win) {
+        win.webContents.send('log-message', message);
     }
 }
 
