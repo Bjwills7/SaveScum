@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require("path");
 const fs = require('fs');
 
@@ -18,7 +18,16 @@ const createWindow = () => {
     win.webContents.openDevTools();
 };
 
+// test file opening logic
+async function handleFileOpen () {
+    const { canceled, filePaths } = await dialog.showOpenDialog();
+    if (!canceled) {
+      return filePaths[0]
+    }
+}
+
 app.whenReady().then(() => {
+    ipcMain.handle('dialog:openFile', handleFileOpen);
     createWindow();
 
     app.on("activate", () => { // Creates new window when app is activated and no windows currently exist. MacOS specific
@@ -70,6 +79,8 @@ const startAutoSave = (source) => {
             if (err.code === 'ENOENT') {
                 console.log(`File ${source} does not exist yet, retrying in 10 seconds...`);
                 setTimeout(() => startAutoSave(source), 10000);
+            } else if (err.message === 'The "filename" argument must be of type string or an instance of Buffer or URL. Received undefined') {
+                console.log(`Error starting auto-save: No save file selected`);
             } else {
                 console.log(`Error starting watcher: ${err.message}`);
             }
