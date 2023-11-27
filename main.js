@@ -68,10 +68,8 @@ const startAutoSave = (source) => {
     try {
         watcher = fs.watch(source, (eventType, filename) => {
             if (eventType === 'rename') {
-                logToRenderer('You died, press continue in main menu (file deleted)');
+                logToRenderer('You died, press continue in main menu');
             } else {
-                logToRenderer(`eventType: ${eventType}`);
-                logToRenderer(`filename: ${filename}`);
                 copyFile(source, source.replace('.rsg', '.rcp'));
             }
         });

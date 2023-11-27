@@ -24,6 +24,7 @@ openFileBtn.addEventListener('click', async () => {
 
 // Recieves messages from main process and handles them accordingly
 window.electronAPI.listenForLogs((message) => {
+    if (consoleDisplay.textContent.endsWith(message)) return;
     console.log(message);
     const lineBreak = document.createElement('br');
     const newMessageNode = document.createTextNode(message);
