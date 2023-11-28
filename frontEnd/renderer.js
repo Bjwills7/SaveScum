@@ -29,4 +29,9 @@ window.electronAPI.listenForLogs((message) => {
     const lineBreak = document.createElement('br');
     const newMessageNode = document.createTextNode(message);
     consoleDisplay.append(lineBreak, newMessageNode);
+    scrollToBottom();
 })
+
+const scrollToBottom = () => {
+    consoleDisplay.scrollTop = consoleDisplay.scrollHeight;
+}

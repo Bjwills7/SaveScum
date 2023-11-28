@@ -17,7 +17,6 @@ const createWindow = () => {
     });
 
     win.loadFile('frontEnd/index.html');
-    win.webContents.openDevTools();
 };
 
 
